@@ -1,0 +1,121 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              01/01/2021 13:14:03 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: G:\Keil5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "timefunc.h"
+   2          /*外部中断0*/
+   3          void InitInt0()
+   4          {
+   5   1        IT0=1;
+   6   1        EX0=1;
+   7   1        EA=1;
+   8   1      }
+   9          /*定时器0中断*/
+  10          void InitTimer0()
+  11          {
+  12   1          TMOD = 0x01;
+  13   1          TH0 = 0x0DC;
+  14   1          TL0 = 0x0D8;
+  15   1          EA = 1;
+  16   1          ET0 = 1;
+  17   1          TR0 = 1;
+  18   1      }
+  19          /*主函数*/
+  20          int main()
+  21          {
+  22   1        InitInt0();
+  23   1        InitTimer0();
+  24   1        while(1)
+  25   1        {
+  26   2          datapros();
+  27   2          smgsend(Display);
+  28   2          key=KeyScan();
+  29   2          if(key==1)
+  30   2          {
+  31   3            delay(20000);
+  32   3            flag[1] = 0;
+  33   3            msTimer();
+  34   3          }
+  35   2          if(key==2)
+  36   2          {
+  37   3            delay(20000);
+  38   3            EX0=0;
+  39   3            flag[2] = 2;
+  40   3            AlarmSet();
+  41   3          }
+  42   2          if(clock[0]==alarm[0] && clock[1]==alarm[1] && clock[2]==alarm[2] && flag[3]==1)/*闹钟触发条件*/
+  43   2          {
+  44   3            while(1)
+  45   3            {
+  46   4              int i=100;
+  47   4              smgsend(DisplayAlarm);
+  48   4              while(i)
+  49   4              {
+  50   5                i--;
+  51   5                beep=~beep;
+  52   5                delay(100);
+  53   5              }
+  54   4              key=KeyScan();
+C51 COMPILER V9.59.0.0   MAIN                                                              01/01/2021 13:14:03 PAGE 2   
+
+  55   4              if(key==1)
+  56   4              {delay(20000);break;}
+  57   4            }
+  58   3          }
+  59   2        }
+  60   1      }
+  61          /*外部中断0*/
+  62          void Int0() interrupt 0
+  63          {
+  64   1        delay(1000);
+  65   1        if(BT3==0)
+  66   1        { 
+  67   2        delay(20000);
+  68   2        flag[4]=2;
+  69   2        TimeSet();
+  70   2        }
+  71   1        else  ET0=1;
+  72   1      }
+  73          /*定时器0*/
+  74          void Timer0() interrupt 1
+  75          {
+  76   1        TH0 = 0x0DC;
+  77   1        TL0 = 0x0D8;
+  78   1        clock[3]++;
+  79   1        if(clock[3]>=100)
+  80   1        {
+  81   2          clock[3]=0;
+  82   2          clock[2]++;
+  83   2          TimeCalc(1,clock);
+  84   2        }
+  85   1      if(flag[1]==1)
+  86   1          {
+  87   2            ms2++;
+  88   2            if(ms2>=100)
+  89   2            {
+  90   3              ms2=0;
+  91   3              sec++;
+  92   3            }
+  93   2          }
+  94   1      }
+*** WARNING C291 IN LINE 149 OF main.c: not every exit path returns a value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   3326    ----
+   CONSTANT SIZE    =     34    ----
+   XDATA SIZE       =    142       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
